@@ -3,10 +3,15 @@ import plotly.express as px
 import pandas as pd
 
 def create_inferred_stats_tab(df: pd.DataFrame):
+    # Create a copy of the DataFrame
     df = df.copy()
+    # Create the bins for different age groups
     age_bins = [0, 12, 18, 30, 45, 60, 90]
+    # Define the group names
     age_labels = ['0-12', '13-18', '19-30', '31-45', '46-60', '60+']
+    # Cutting the data according to the splits
     df['AgeGroup'] = pd.cut(df['Age'], bins=age_bins, labels=age_labels, right=False)
+    # Extract the day name of each appointment day
     df['DayOfWeek'] = pd.to_datetime(df['AppointmentDay']).dt.day_name()
     
     return html.Div(
@@ -16,6 +21,7 @@ def create_inferred_stats_tab(df: pd.DataFrame):
             html.Div([
                 html.H5("Appointments by Gender", className="graph-title"),
                 dcc.Graph(
+                    # Create a pie chart showing the percent of Males to Females
                     figure=px.pie(
                         df,
                         names=df['Gender'].map({'F': 'Female', 'M': 'Male'}),
@@ -38,14 +44,15 @@ def create_inferred_stats_tab(df: pd.DataFrame):
                 html.H5("No-show Rate by Age Group", className="graph-title"),
                 dcc.Graph(
                     figure=px.bar(
-                        df.groupby('AgeGroup')['No-show'].value_counts(normalize=True).mul(100).unstack(),
+                        # Getting the number of appointments by each group in the data
+                        df.groupby('AgeGroup')['No-show'].value_counts().unstack(),
                         x=age_labels,
                         y='Yes',
                         labels={'x': 'Age Group', 'Yes': 'No-show Rate (%)'},
                         text_auto='.1f',
                         color_discrete_sequence=['#EF553B']
                     ).update_layout(
-                        yaxis_title='No-show Rate (%)',
+                        yaxis_title='No-show Rate',
                         margin=dict(l=60, r=20, t=40, b=60),
                         xaxis_tickangle=-45
                     )
@@ -58,6 +65,7 @@ def create_inferred_stats_tab(df: pd.DataFrame):
             html.Div([
                 html.H5("SMS Impact on Attendance", className="graph-title"),
                 dcc.Graph(
+                    # Bar graph to show the percentage of No-show appointments that received and didn't receive SMS
                     figure=px.bar(
                         df.groupby('SMS_received')['No-show'].value_counts(normalize=True).mul(100).unstack(),
                         x=['No SMS', 'Received SMS'],
@@ -66,7 +74,7 @@ def create_inferred_stats_tab(df: pd.DataFrame):
                         text_auto='.1f',
                         color_discrete_sequence=['#636EFA']
                     ).update_layout(
-                        yaxis_title='No-show Rate (%)',
+                        yaxis_title='No-show Rate',
                         margin=dict(l=60, r=20, t=40, b=60)
                     )
                 )
@@ -78,6 +86,7 @@ def create_inferred_stats_tab(df: pd.DataFrame):
             html.Div([
                 html.H5("Appointments by Weekday", className="graph-title"),
                 dcc.Graph(
+                    # Bar graph to get the number of appointments per day of the week
                     figure=px.bar(
                         df['DayOfWeek'].value_counts().reset_index(),
                         x='DayOfWeek',
@@ -97,6 +106,7 @@ def create_inferred_stats_tab(df: pd.DataFrame):
             
             # Handicap Analysis
             html.Div([
+                # Two graphs showing the attendance rate of handcapped and non-handcapped people
                 html.H5("Attendance by Handicap Status", className="graph-title"),
                 html.Div([
                     # Non-Handicapped

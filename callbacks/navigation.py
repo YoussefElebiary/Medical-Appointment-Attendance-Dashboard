@@ -1,6 +1,6 @@
 from dash.dependencies import Input, Output
 
-def register_navigation_callbacks(app, SM, IS, VD, RP):
+def register_navigation_callbacks(app, SM, IS, VD):
     @app.callback(
         Output('TabContent', 'children'),
         Input('NavBar', 'value')
@@ -12,5 +12,3 @@ def register_navigation_callbacks(app, SM, IS, VD, RP):
             return IS
         elif tab == 'VD':
             return VD
-        elif tab == 'RP':
-            return RP
